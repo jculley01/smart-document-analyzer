@@ -1,6 +1,7 @@
 import textract
 import os
 import tempfile
+import csv
 
 def convert_to_text(file_stream, extension):
     text = ""
