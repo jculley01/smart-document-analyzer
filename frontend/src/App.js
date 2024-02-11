@@ -1,25 +1,57 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { AppBar, Toolbar, Typography, Container, Grid, Card, CardContent, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import FileUpload from './FileUpload';
+import Documents from './components/Documents';
 
-function App() {
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#556cd6',
+    },
+    secondary: {
+      main: '#19857b',
+    },
+  },
+});
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6">
+            Document Management System
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Container maxWidth="md" style={{ marginTop: '20px' }}>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  File Upload Portal
+                </Typography>
+                <FileUpload />
+                {/* Removed the standalone Button component */}
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  Documents Section
+                </Typography>
+                <Documents />
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
+    </ThemeProvider>
   );
-}
+};
 
 export default App;

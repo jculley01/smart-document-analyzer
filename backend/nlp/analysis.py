@@ -15,7 +15,7 @@ def analyze_text():
 
     text = data['text']
     analysis_type = data['type'].lower()
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "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"))
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "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"))
     if analysis_type == 'definition':
         # Assuming get_keyword_info returns a definition for the keyword
         result = get_keyword_info(client, text)
