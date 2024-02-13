@@ -3,7 +3,7 @@ import { Box, Button, Typography, CircularProgress, Snackbar } from '@mui/materi
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 
-const FileUpload = () => {
+const FileUpload = (props) => { // Explicitly include props here
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -36,6 +36,8 @@ const FileUpload = () => {
                 const data = await response.json();
                 setSnackbarMessage('File successfully uploaded!');
                 setSnackbarOpen(true);
+                // Use props to access onUploadSuccess function
+                props.onUploadSuccess(); // Call the function passed through props
                 console.log(data);
             } else {
                 const errorData = await response.json();
@@ -45,6 +47,7 @@ const FileUpload = () => {
             console.error('Error uploading file:', error);
             setSnackbarMessage(error.message);
             setSnackbarOpen(true);
+            setUploading(false);
         }
     };
 

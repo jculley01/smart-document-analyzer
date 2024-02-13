@@ -15,7 +15,7 @@ class Paragraph(db.Model):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id'), nullable=False)
     text = db.Column(db.Text)
     summary = db.Column(db.Text)
-    sentiment = db.Column(db.String(50))
+    sentiment = db.Column(db.String(250))
     document = db.relationship('Document', back_populates='paragraphs')
     sentences = db.relationship('Sentence', back_populates='paragraph', cascade="all, delete-orphan")
 
@@ -23,7 +23,7 @@ class Sentence(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     paragraph_id = db.Column(db.Integer, db.ForeignKey('paragraph.id'), nullable=False)
     text = db.Column(db.Text)
-    sentiment = db.Column(db.String(50))  # Add this line if you want to store sentiment for sentences.
+    sentiment = db.Column(db.String(250))  # Add this line if you want to store sentiment for sentences.
     paragraph = db.relationship('Paragraph', back_populates='sentences')
     keywords = db.relationship('Keyword', back_populates='sentence', cascade="all, delete-orphan")
 

@@ -1,4 +1,6 @@
 from flask import Flask
+from dbroutes.sentimentretrieval import sentiment_blueprint
+from dbroutes.paragraphs import paragraph_blueprint
 from dbroutes.sentences import sentences_blueprint
 from dbroutes.definitions import definition_blueprint
 from dbroutes.documentupdate import summary_blueprint
@@ -29,6 +31,8 @@ app.register_blueprint(document_blueprint, url_prefix='/api')
 app.register_blueprint(summary_blueprint, url_prefix='/api')
 app.register_blueprint(definition_blueprint, url_prefix='/api')
 app.register_blueprint(sentences_blueprint, url_prefix='/api')
+app.register_blueprint(paragraph_blueprint, url_prefix='/api')
+app.register_blueprint(sentiment_blueprint, url_prefix='/api')
 
 
 if __name__ == '__main__':

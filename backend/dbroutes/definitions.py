@@ -14,7 +14,7 @@ def get_or_update_definition():
 
     keyword_text = data['text']
     keyword = Keyword.query.filter_by(text=keyword_text).first()
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "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"))
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "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"))
     # If the keyword exists and has a definition, return it
     if keyword and keyword.definition:
         return jsonify({'text': keyword.text, 'definition': keyword.definition}), 200

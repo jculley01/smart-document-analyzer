@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppBar, Toolbar, Typography, Container, Grid, Card, CardContent, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import FileUpload from './FileUpload';
 import Documents from './components/Documents';
+import Sentiment from './components/Sentiment';
 
 const theme = createTheme({
   palette: {
@@ -15,6 +16,12 @@ const theme = createTheme({
 });
 
 const App = () => {
+  const [uploadTrigger, setUploadTrigger] = useState(false);
+
+  const handleUploadSuccess = () => {
+    setUploadTrigger(prev => !prev);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -25,7 +32,7 @@ const App = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="md" style={{ marginTop: '20px' }}>
+      <Container maxWidth="lg" sx={{ mt: 3 }}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Card>
@@ -33,8 +40,17 @@ const App = () => {
                 <Typography variant="h5" gutterBottom>
                   File Upload Portal
                 </Typography>
-                <FileUpload />
-                {/* Removed the standalone Button component */}
+                <FileUpload onUploadSuccess={handleUploadSuccess} />
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  Find Paragraphs and Sentences:
+                </Typography>
+                <Sentiment />
               </CardContent>
             </Card>
           </Grid>
@@ -44,7 +60,7 @@ const App = () => {
                 <Typography variant="h5" gutterBottom>
                   Documents Section
                 </Typography>
-                <Documents />
+                <Documents uploadTrigger={uploadTrigger} />
               </CardContent>
             </Card>
           </Grid>

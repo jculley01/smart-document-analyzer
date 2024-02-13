@@ -1,26 +1,25 @@
-from openai import OpenAI
-import os
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
 
-def analyze_sentiment_with_openai(client, text):
+nltk.download('vader_lexicon')
+
+def detect_sentiment_vader(text):
     """
-    Analyzes the sentiment of the given text using the OpenAI GPT model.
+    Detects the sentiment of the provided text using NLTK's VADER.
 
     Parameters:
-    - text (str): The text to analyze.
+    - text (str): The text whose sentiment needs to be analyzed.
 
     Returns:
-    - str: A string indicating the sentiment of the text.
+    - str: 'Positive', 'Negative', or 'Neutral' based on the sentiment analysis.
     """
-    MODEL = "gpt-3.5-turbo"
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant skilled in analyzing sentiment. Determine whether the sentiment of the following text is positive, negative, or neutral."},
-            {"role": "user", "content": text},
-        ],
-        temperature=0,
-    )
+    sia = SentimentIntensityAnalyzer()
+    score = sia.polarity_scores(text)
 
-    sentiment = response.choices[0].message.content
-    # sentiment = "this is a test sentiment"
-    return sentiment
+    # Classifying the sentiment based on the compound score
+    if score['compound'] >= 0.05:
+        return 'Positive'
+    elif score['compound'] <= -0.05:
+        return 'Negative'
+    else:
+        return 'Neutral'
