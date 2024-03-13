@@ -5,13 +5,14 @@ from dbroutes.sentences import sentences_blueprint
 from dbroutes.definitions import definition_blueprint
 from dbroutes.documentupdate import summary_blueprint
 from dbroutes.documents import document_blueprint
-from uploader.uploader import uploader_blueprint
+from uploader.uploader import uploader_blueprint, worker
 from dbroutes.keywords import keyword_blueprint
 from nlp.analysis import analysis_blueprint  # Import the analysis blueprint
 from models import db
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS  # Import CORS
+from threading import Thread
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -38,4 +39,8 @@ app.register_blueprint(sentiment_blueprint, url_prefix='/api')
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        
+    for _ in range(4):
+        t = Thread(target=worker, args=(app,), daemon=True)
+        t.start()
     app.run(debug=True)

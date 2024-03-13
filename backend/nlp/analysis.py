@@ -15,7 +15,7 @@ def analyze_text():
 
     text = data['text']
     analysis_type = data['type'].lower()
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "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"))
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "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"))
     if analysis_type == 'definition':
         # Assuming get_keyword_info returns a definition for the keyword
         result = get_keyword_info(client, text)
@@ -28,5 +28,3 @@ def analyze_text():
 
     return jsonify({'result': result}), 200
 
-# Remember to register the Blueprint in your main Flask application setup
-# app.register_blueprint(analysis_blueprint, url_prefix='/api')

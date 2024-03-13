@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import { useUser } from '../UserContext.js';
 import {
     Box,
     Button,
@@ -17,7 +17,8 @@ import {
     Card,
     CardContent,
 } from '@mui/material';
-const Documents = ({uploadTrigger}) => {
+
+const Documents = ({ uploadTrigger }) => {
     const [documents, setDocuments] = useState([]);
     const [selectedDocument, setSelectedDocument] = useState({ id: null, filename: '' });
     const [keywords, setKeywords] = useState([]);
@@ -27,28 +28,28 @@ const Documents = ({uploadTrigger}) => {
     const [currentSummaryDocumentTitle, setCurrentSummaryDocumentTitle] = useState("");
     const [currentKeywordParagraphs, setCurrentKeywordParagraphs] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-
-
+    const { user } = useUser();
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/documents')
-            .then(response => response.json())
-            .then(data => setDocuments(data))
-            .catch(error => console.error('Error fetching documents:', error));
-    }, [uploadTrigger]); // Add uploadTrigger as a dependency here
+        if (user && user.sub) {
+            fetch(`http://localhost:5000/api/documents?sub=${encodeURIComponent(user.sub)}`)
+                .then(response => response.json())
+                .then(data => setDocuments(data))
+                .catch(error => console.error('Error fetching documents:', error));
+        }
+    }, [uploadTrigger, user]);
 
+    // Function to handle fetching summary for a document
     const getSummary = (documentId) => {
-        setIsLoading(true); // Start loading before any operation
+        setIsLoading(true);
 
         const doc = documents.find(doc => doc.id === documentId);
         if (doc && doc.summary) {
-            // If the document already has a summary, we don't need to fetch it again
             setCurrentSummaryDocumentTitle(doc.filename);
             setCurrentSummaryContent(doc.summary);
             setIsSummaryVisible(true);
-            setIsLoading(false); // Stop loading since the summary is already available
+            setIsLoading(false);
         } else {
-            // If there's no summary, fetch it from the API
             fetch(`http://localhost:5000/api/analyze`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -56,16 +57,14 @@ const Documents = ({uploadTrigger}) => {
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Use the summary data.result here and return a promise for the next then()
                     return fetch(`http://localhost:5000/api/documents/${documentId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ summary: data.result }),
                     })
-                        .then(() => data); // Return data to be used in the next then block
+                        .then(() => data);
                 })
                 .then(data => {
-                    // Now data is defined here, where we can use its result
                     const updatedDocuments = documents.map(document => {
                         return document.id === documentId ? { ...document, summary: data.result } : document;
                     });
@@ -78,17 +77,15 @@ const Documents = ({uploadTrigger}) => {
                     console.error('Error updating document with summary:', error);
                 })
                 .finally(() => {
-                    setIsLoading(false); // Stop loading regardless of the outcome
+                    setIsLoading(false);
                 });
         }
     };
 
-
-
+    // Function to handle fetching keywords for a document
     const getKeywords = (documentId) => {
         const doc = documents.find(doc => doc.id === documentId);
 
-        // Reset current keyword details and paragraphs when selecting a new document
         setCurrentKeywordDetails({ keyword: '', definition: '', sentences: [] });
         setCurrentKeywordParagraphs([]);
 
@@ -106,16 +103,15 @@ const Documents = ({uploadTrigger}) => {
         }
     };
 
-
+    // Function to handle fetching details for a keyword
     const getKeywordDetails = (keywordText) => {
         if (!selectedDocument.id) {
             console.error('No document is selected.');
             return;
         }
 
-        setIsLoading(true); // Start loading
+        setIsLoading(true);
 
-        // Fetch keyword definition and sentences
         fetch(`http://localhost:5000/api/keywords/definition`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -138,7 +134,6 @@ const Documents = ({uploadTrigger}) => {
                     sentences: sentenceData.sentences,
                 }));
 
-                // Fetch paragraphs
                 return fetch(`http://localhost:5000/api/paragraphs/${encodeURIComponent(keywordText)}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
@@ -151,15 +146,14 @@ const Documents = ({uploadTrigger}) => {
                 return response.json();
             })
             .then(paragraphData => {
-                setCurrentKeywordParagraphs(paragraphData); // Assuming the API returns an array of paragraphs
-                setIsLoading(false); // End loading
+                setCurrentKeywordParagraphs(paragraphData);
+                setIsLoading(false);
             })
             .catch(error => {
                 console.error(`Error fetching details for keyword ${keywordText}:`, error);
-                setIsLoading(false); // End loading in case of error as well
+                setIsLoading(false);
             });
     };
-
 
     const handleClose = () => {
         setIsSummaryVisible(false);
@@ -171,33 +165,39 @@ const Documents = ({uploadTrigger}) => {
                 Uploaded Documents
             </Typography>
 
-            <TableContainer component={Paper} elevation={3} style={{ marginTop: '20px' }}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Filename</TableCell>
-                            <TableCell align="right">Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {documents.map((doc) => (
-                            <TableRow key={doc.id}>
-                                <TableCell component="th" scope="row">
-                                    {doc.filename}
-                                </TableCell>
-                                <TableCell align="right">
-                                    <Button variant="contained" color="primary" onClick={() => getSummary(doc.id)} style={{ marginRight: '10px' }}>
-                                        Get Summary
-                                    </Button>
-                                    <Button variant="contained" color="secondary" onClick={() => getKeywords(doc.id)}>
-                                        Get Keywords
-                                    </Button>
-                                </TableCell>
+            {documents.length > 0 ? (
+                <TableContainer component={Paper} elevation={3} style={{ marginTop: '20px' }}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Filename</TableCell>
+                                <TableCell align="right">Actions</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {documents.map((doc) => (
+                                <TableRow key={doc.id}>
+                                    <TableCell component="th" scope="row">
+                                        {doc.filename}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Button variant="contained" color="primary" onClick={() => getSummary(doc.id)} style={{ marginRight: '10px' }}>
+                                            Get Summary
+                                        </Button>
+                                        <Button variant="contained" color="secondary" onClick={() => getKeywords(doc.id)}>
+                                            Get Keywords
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            ) : (
+                <Typography variant="body1" gutterBottom style={{ marginTop: '20px', textAlign: 'center' }}>
+                    No documents available.
+                </Typography>
+            )}
 
             {selectedDocument.id && keywords.length > 0 && (
                 <Card variant="outlined" style={{ marginTop: '30px' }}>
@@ -285,7 +285,6 @@ const Documents = ({uploadTrigger}) => {
                 </Card>
             )}
 
-
             <Modal
                 open={isSummaryVisible}
                 onClose={handleClose}
@@ -299,22 +298,22 @@ const Documents = ({uploadTrigger}) => {
                         </Box>
                     ) : (
                         <>
-                                <Typography
-                                    id="modal-title"
-                                    variant="h6" // Use a larger variant for the title
-                                    component="h2"
-                                    gutterBottom
-                                    sx={{
-                                        fontWeight: 'bold', // Make the font weight bold
-                                        color: '#1976d2', // Change the color to a shade of blue (or any color you prefer)
-                                        marginBottom: 2, // Increase the bottom margin for better spacing
-                                        textAlign: 'center', // Center-align the title
-                                        textTransform: 'uppercase', // Optional: CAPITALIZE the title
-                                        letterSpacing: 1, // Increase letter spacing for better readability
-                                    }}
-                                >
-                                    Summary for {currentSummaryDocumentTitle}
-                                </Typography>
+                            <Typography
+                                id="modal-title"
+                                variant="h6"
+                                component="h2"
+                                gutterBottom
+                                sx={{
+                                    fontWeight: 'bold',
+                                    color: '#1976d2',
+                                    marginBottom: 2,
+                                    textAlign: 'center',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: 1,
+                                }}
+                            >
+                                Summary for {currentSummaryDocumentTitle}
+                            </Typography>
 
                             <Typography id="modal-description" variant="body2">
                                 {currentSummaryContent}
