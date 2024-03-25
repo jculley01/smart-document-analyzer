@@ -4,13 +4,10 @@ from models import db, Document, Paragraph, Sentence, Keyword, User
 from .file_conversion import convert_to_text
 from nlp.sentiment import detect_sentiment_vader
 from .text_extractions import extract_paragraphs, extract_sentences, extract_keywords
-from threading import Thread
-from queue import Queue
 from io import BytesIO
 import os
 
 uploader_blueprint = Blueprint('uploader', __name__)
-file_queue = Queue()
 
 def process_file(file_content, filename, user_id):
     print("Processing file:", filename)
@@ -51,25 +48,6 @@ def process_file(file_content, filename, user_id):
     db.session.commit()
     print("File processed successfully:", filename)
 
-def worker(app):
-    while True:
-        try: 
-            file_content, filename, auth_sub = file_queue.get()  # Adjusted to match the queued items
-            print("Worker picked up file:", filename)
-            with app.app_context():
-                user = User.query.filter_by(sub=auth_sub).first()
-                if not user:
-                    print("Creating new user with sub:", auth_sub)
-                    user = User(sub=auth_sub)
-                    db.session.add(user)
-                    db.session.commit()
-
-                # Adjust process_file to accept file content and filename, and use them accordingly
-                process_file(file_content, filename, user.id)
-            file_queue.task_done()
-        except Exception as e: 
-            print("exception in worker thread: {e}", flush=True)
-
 @uploader_blueprint.route('/upload', methods=['POST'])
 def upload_files():
     print("Upload request received")
@@ -89,8 +67,19 @@ def upload_files():
             continue  # Skip empty filenames
         # Read the file content into memory
         file_content = file.read()
-        print("Queuing file for processing:", file.filename)
-        # Queue the file content and filename for processing
-        file_queue.put((file_content, file.filename, auth_sub))
+        filename = secure_filename(file.filename)
+        print("Processing file:", filename)
 
-    return jsonify({'message': 'Files are being processed'}), 202
+        # Directly get or create the user
+        user = User.query.filter_by(sub=auth_sub).first()
+        if not user:
+            print("Creating new user with sub:", auth_sub)
+            user = User(sub=auth_sub)
+            db.session.add(user)
+            db.session.commit()
+
+        # Process the file content directly here
+        process_file(file_content, filename, user.id)
+
+    return jsonify({'message': 'Files have been processed'}), 202
+

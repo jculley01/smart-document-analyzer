@@ -5,7 +5,7 @@ from dbroutes.sentences import sentences_blueprint
 from dbroutes.definitions import definition_blueprint
 from dbroutes.documentupdate import summary_blueprint
 from dbroutes.documents import document_blueprint
-from uploader.uploader import uploader_blueprint, worker
+from uploader.uploader import uploader_blueprint
 from dbroutes.keywords import keyword_blueprint
 from nlp.analysis import analysis_blueprint
 from models import db
@@ -24,6 +24,11 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret_key')
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))  # 16 MB limit
 
 print(app.config['SQLALCHEMY_DATABASE_URI'])
+
+import nltk
+
+# Download NLTK data
+nltk.download('punkt')
 
 
 CORS(app)  # Set up CORS with default options to allow all origins by default
@@ -51,7 +56,7 @@ if __name__ == '__main__':
             print("Database connection OK")
         except Exception as e:
             print("Database connection failed:", e)
-    for _ in range(4):
-        t = Thread(target=worker, args=(app,), daemon=True)
-        t.start()
+    # for _ in range(4):
+    #     t = Thread(target=worker, args=(app,), daemon=True)
+    #     t.start()
     app.run(debug=True)
