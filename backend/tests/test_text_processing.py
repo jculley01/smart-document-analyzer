@@ -3,6 +3,8 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath('../..'))  # Adjust this path based on the actual relative path to the project root
 from uploader.text_extractions import extract_keywords, extract_paragraphs, extract_sentences
+import nltk
+nltk.download('punkt')
 
 
 class TestTextProcessing(unittest.TestCase):
