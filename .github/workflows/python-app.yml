@@ -43,5 +43,6 @@ jobs:
         FLASK_ENV: development
         SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/testdb
       run: |
+        cd backend
         cd tests
         python -m unittest discover
