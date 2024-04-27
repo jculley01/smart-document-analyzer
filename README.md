@@ -63,6 +63,10 @@ https://drive.google.com/file/d/1k0UFtQoVwsvJGqp-D9baBAP2JQRSBe9u/view?usp=shari
 
 The system employs a Python Flask server to establish a REST API gateway, facilitating data exchanges with the React frontend web application. This gateway serves as the primary conduit for sending and receiving data, ensuring seamless interaction between the user interface and the backend. Additionally, the Flask server interacts with a PostgreSQL database to store and retrieve all necessary data, supporting frontend functionalities. To enhance deployment and scalability, each component of the system—Flask server, PostgreSQL database, and React frontend—is containerized using Docker. These containers are orchestrated with Docker Compose, allowing them to be managed as a unified service. This containerization strategy streamlines development, testing, and production workflows, ensuring consistency across different environments and simplifying system maintenance and scalability.
 
+## Testing
+
+Unit tests have been developed for some of the functions and are integrated with Github actions via a yaml file. 
+
 ## Images
 
 ![Login Screen](image.png)
