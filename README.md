@@ -57,7 +57,7 @@ docker-compose down -v
 ```
 
 ## Demo
-![Demo](https://drive.google.com/file/d/1k0UFtQoVwsvJGqp-D9baBAP2JQRSBe9u/view?usp=sharing)
+https://drive.google.com/file/d/1k0UFtQoVwsvJGqp-D9baBAP2JQRSBe9u/view?usp=sharing
 
 ## System Architecture
 
